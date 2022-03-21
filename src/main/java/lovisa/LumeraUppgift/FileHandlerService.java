@@ -23,8 +23,9 @@ public class FileHandlerService {
     PaymentReceiver paymentReceiver;
 
     public String inputFile(MultipartFile file) throws FileInputException, IOException, ParseException {
-        if (file.getOriginalFilename() != null && file.getOriginalFilename().contains("_")) {
-            String fileType = file.getOriginalFilename().substring(file.getOriginalFilename().lastIndexOf("_"));
+        String fileName = file.getOriginalFilename();
+        if (fileName != null && fileName.contains("_")) {
+            String fileType = fileName.substring(fileName.lastIndexOf("_"));
             switch (fileType){
                 case "_inbetalningstjansten.txt":
                     typeInbetalningstjansten(file);
@@ -35,7 +36,7 @@ public class FileHandlerService {
                     break;
 
                 default:
-                    throw new FileInputException(file.getOriginalFilename() + " is of unknown type");
+                    throw new FileInputException(fileName + " is of unknown type");
             }
             return file.getOriginalFilename() + " has been processed";
         } else {
@@ -50,7 +51,7 @@ public class FileHandlerService {
 
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(file.getInputStream(), StandardCharsets.ISO_8859_1))) {
             while ((tempLine = reader.readLine()) != null){
-                String post = new String(tempLine.getBytes("ISO-8859-1"), "UTF-8");
+                String post = new String(tempLine.getBytes(StandardCharsets.ISO_8859_1), StandardCharsets.UTF_8);
 
                 switch (post.charAt(0)){
                     case 'O':
@@ -92,16 +93,16 @@ public class FileHandlerService {
         }
     }
 
-    private void typeInbetalningstjansten(MultipartFile file) throws IOException, ParseException {
+    private void typeInbetalningstjansten(MultipartFile file) throws IOException {
         paymentReceiver = new PaymentReceiverInbetalningstjansten();
         String tempLine;
         status = FileStatus.STARTED;
         BigDecimal totalAmount = BigDecimal.valueOf(0);
         int numberOfPosts = 0;
 
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(file.getInputStream(), StandardCharsets.ISO_8859_1));) {
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(file.getInputStream(), StandardCharsets.ISO_8859_1))) {
             while ((tempLine = reader.readLine()) != null){
-                String post = new String(tempLine.getBytes("ISO-8859-1"), "UTF-8");
+                String post = new String(tempLine.getBytes(StandardCharsets.ISO_8859_1), StandardCharsets.UTF_8);
 
                 switch (post.substring(0,2)){
                     case "00":
